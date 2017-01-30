@@ -22,7 +22,9 @@ class NeuralNetwork():
         return x * (1-x)
     
     def train(self, training_set_inputs, training_set_outputs, number_of_training_iterations):
-        for iteration in xrange(number_of_training_iterations):
+        #for iteration in xrange(number_of_training_iterations):
+        #Had to change xrange to range below since using python 3
+        for iteration in range(number_of_training_iterations):
             #pass the training set through our neural net
             output = self.predict(training_set_inputs)
 
@@ -43,21 +45,21 @@ if __name__ == '__main__':
     #init a single neuron NN
     neuralNetwork = NeuralNetwork()
 
-    print 'Random starting synaptic weight:'
-    print neuralNetwork.synaptic_weights
+    print ('Random starting synaptic weight:')
+    print (neuralNetwork.synaptic_weights)
 
     #The training set contains 4 examples, each consisting of 3 input values and 1 output
     training_set_inputs = array([[0,0,1], [1,1,1], [1,0,1], [0,1,1]])
     training_set_outputs = array([[0,1,1,0]]).T
 
     #Train the neural network using a training set
-    #Do it 1000 times and make small adjustments each time
+    #Do it 10000 times and make small adjustments each time
     neuralNetwork.train(training_set_inputs, training_set_outputs, 10000)
 
-    print "New synaptic weights after training: "
-    print neuralNetwork.synaptic_weights
+    print ("New synaptic weights after training: ")
+    print (neuralNetwork.synaptic_weights)
 
     #Test the neural network with a new situation
-    print "Considering new situation [1,0,0] -> ?: "
-    print neuralNetwork.predict(array([1,0,0]))
+    print ("Considering new situation [1,0,0] -> ?: ")
+    print (neuralNetwork.predict(array([1,0,0])))
 
