@@ -6,19 +6,19 @@ class Layer():
         self.adjustment = 0.0
 
 class NeuralNetwork():
-    def __init__(self, *layers):
-        #Seed the random number generator, so it generates the same numbers
-        #every time the program runs
-        random.seed(1)
-
-        self.totalLayers = list(layers)
-        self.numLayers = len(self.totalLayers)
-    
     @staticmethod
     def printWeights(nn):
         print("Current synaptic weights:")
         for i in range(nn.numLayers):
+            print("** LAYER {0}".format(i))
             print(nn.totalLayers[i].synaptic_weights)
+
+    def __init__(self, *layers):
+        #Seed the random number generator, so it generates the same numbers
+        #every time the program runs
+        random.seed(1)
+        self.totalLayers = list(layers)
+        self.numLayers = len(self.totalLayers)
 
     #The sigmoid function, which describes an s shaped curve
     #we pass the weighted sum of the inputs through this function
@@ -32,11 +32,13 @@ class NeuralNetwork():
 
     def backpropagate(self, outputs):
         ndx = self.numLayers - 1
-        self.totalLayers[ndx].error = outputs - self.totalLayers[ndx].predict
-        self.totalLayers[ndx].adjustment = dot(self.totalLayers[ndx-1].predict.T, self.totalLayers[ndx].error * self.__sigmoid_derivative(self.totalLayers[ndx].predict))
+        #Going to try only calculating the error on the output and using the same value throughout
+        #to see if this fixes my random output value each run
+        self.totalLayers[ndx].error = outputs - self.totalLayers[ndx].output
+        self.totalLayers[ndx].adjustment = dot(self.totalLayers[ndx-1].output.T, self.totalLayers[ndx].error * self.__sigmoid_derivative(self.totalLayers[ndx].output))
         for i in range(ndx-1, -1, -1):
-            self.totalLayers[i].error = outputs - self.totalLayers[i].predict
-            self.totalLayers[i].adjustment = dot(self.totalLayers[i-1].predict.T, self.totalLayers[i].error * self.__sigmoid_derivative(self.totalLayers[i].predict))
+            self.totalLayers[i].error = self.totalLayers[ndx].error
+            self.totalLayers[i].adjustment = dot(self.totalLayers[i-1].output.T, self.totalLayers[i].error * self.__sigmoid_derivative(self.totalLayers[i].output))
             self.totalLayers[i].synaptic_weights += self.totalLayers[i].adjustment
     
     def train(self, training_set_inputs, training_set_outputs, number_of_training_iterations):
@@ -46,11 +48,11 @@ class NeuralNetwork():
             self.backpropagate(training_set_outputs)    
     
     def predict(self, inputs):
-        #pass inputs through our neural network (single neuron)
-        self.totalLayers[0].predict = self.__sigmoid(dot(inputs, self.totalLayers[0].synaptic_weights))
+        #pass inputs through our neural network (multi neuron)
+        self.totalLayers[0].output = self.__sigmoid(dot(inputs, self.totalLayers[0].synaptic_weights))
         for i in range(1, self.numLayers):
-            self.totalLayers[i].predict = self.__sigmoid(dot(self.totalLayers[i-1].predict, self.totalLayers[i].synaptic_weights))
-        return self.totalLayers[self.numLayers-1].predict
+            self.totalLayers[i].output = self.__sigmoid(dot(self.totalLayers[i-1].output, self.totalLayers[i].synaptic_weights))
+        return self.totalLayers[self.numLayers-1].output
 
 
 if __name__ == '__main__':
@@ -69,7 +71,7 @@ if __name__ == '__main__':
 
     #Train the neural network using a training set
     #Do it 10000 times and make small adjustments each time
-    neuralNetwork.train(training_set_inputs, training_set_outputs, 20000)
+    neuralNetwork.train(training_set_inputs, training_set_outputs, 10000)
 
     print ("New synaptic weights after training: ")
     NeuralNetwork.printWeights(neuralNetwork)
